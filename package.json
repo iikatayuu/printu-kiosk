@@ -1,7 +1,15 @@
 {
   "name": "printu-kiosk",
   "version": "0.1.0",
+  "description": "Printu is a start up cloud-based printing service which incorporates seamless transaction and convenient printing experience through Quick Response (QR) code.",
   "private": true,
+  "homepage": "https://www.printu.org",
+  "bugs": "https://github.com/eidoriantan/printu-kiosk/issues",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eidoriantan/printu-kiosk.git"
+  },
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
@@ -12,6 +20,7 @@
     "@types/react-dom": "^18.0.11",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^6.8.1",
     "react-scripts": "5.0.1",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
