@@ -98,8 +98,11 @@ class Print extends React.Component<PrintProps, PrintState> {
   }
 
   async startPrinting (document: Document, buffer: ArrayBuffer) {
+    const npps = document.npps;
+    const totalPages = Math.ceil(document.pages / npps);
     let allSuccess = true;
-    for (let i = document.printed; i < document.pages; i++) {
+
+    for (let i = document.printed; i < totalPages; i++) {
       const page = i + 1;
       this.setState({ printing: page });
 
