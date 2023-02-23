@@ -9,7 +9,6 @@ const asyncWrap = require('./utils/async-wrap')
 
 const router = express.Router()
 const printPostOptions = {
-  limit: process.env.FILE_LIMIT,
   type: 'application/pdf'
 }
 
