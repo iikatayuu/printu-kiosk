@@ -1,10 +1,10 @@
 
 const fs = require('node:fs')
 const path = require('node:path')
-const crypto = require('node:crypto')
+const { exec } = require('node:child_process')
 const express = require('express')
 const dotenv = require('dotenv')
-const { print, getDefaultPrinter } = require('unix-print')
+const printAPI = require('./server/print')
 
 let configPath = path.resolve(__dirname, '.env.local')
 if (!fs.existsSync(configPath)) configPath = path.resolve(__dirname, '.env')
@@ -15,11 +15,19 @@ if (process.platform !== 'linux') {
   process.exit(1)
 }
 
-const defaultPrinter = getDefaultPrinter()
-if (defaultPrinter === null) {
-  console.error('No printer detected')
-  process.exit(1)
-}
+exec('lpstat -d', { windowsHide: true }, (error, stdout, stderr) => {
+  if (error) {
+    console.error(stderr)
+    process.exit(1)
+  }
+
+  if (stdout === 'no system default destination') {
+    console.error(stdout)
+    process.exit(1)
+  }
+
+  console.log(stdout)
+})
 
 const tmpDir = path.resolve(__dirname, 'tmp')
 if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir)
@@ -27,35 +35,15 @@ if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir)
 const app = express()
 const port = process.env.PORT || '3001'
 const publicPath = path.resolve(__dirname, 'build')
-const printPostOptions = {
-  limit: '50mb',
-  type: 'application/pdf'
-}
 
 app.use('/', express.static(publicPath))
+app.use('/print', printAPI)
 
-app.post('/print', express.raw(printPostOptions), (req, res) => {
-  const buffer = req.body
-  let pdfpath = ''
-  while (pdfpath === '') {
-    const random = Buffer.from(crypto.randomBytes(4)).toString('hex')
-    const filepath = path.resolve(__dirname, `tmp/${random}.pdf`)
-    if (!fs.existsSync(filepath)) pdfpath = filepath
-  }
-
-  fs.writeFileSync(pdfpath, buffer)
-  print(pdfpath, undefined, ['-m'])
-    .then((value) => {
-      console.log(value)
-      fs.unlinkSync(pdfpath)
-      res.json({
-        success: true,
-        hash: crypto.createHash('md5').update(buffer).digest('hex')
-      })
-    }).catch((error) => {
-      console.error(error)
-      res.json({ success: false })
-    })
+app.use((err, req, res, next) => {
+  res.json({
+    success: false,
+    message: err
+  })
 })
 
 app.listen(port, () => {
