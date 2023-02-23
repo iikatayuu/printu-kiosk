@@ -3,9 +3,9 @@ const cron = require('node-cron')
 const axios = require('axios').default
 
 async function sendStatus () {
-  const data = new FormData()
-  data.set('pass', process.env.ACTIVE_PASS)
-  await axios.post(`${process.env.SERVER_API}/api/active.php`, data)
+  await axios.post(`${process.env.REACT_APP_SERVER_API}/api/active.php`, {
+    pass: process.env.ACTIVE_PASS
+  })
 }
 
 function start () {
