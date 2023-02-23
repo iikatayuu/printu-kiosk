@@ -40,7 +40,7 @@ const port = process.env.PORT || '3001'
 const publicPath = path.resolve(__dirname, 'build')
 
 app.use('/', express.static(publicPath))
-app.use('/print', printAPI)
+app.use('/api/print', printAPI)
 
 app.use((err, req, res, next) => {
   res.json({

@@ -5,23 +5,27 @@ const crypto = require('node:crypto')
 const util = require('node:util')
 const exec = util.promisify(require('node:child_process').exec)
 const express = require('express')
+const multer = require('multer')
 const asyncWrap = require('./utils/async-wrap')
 
 const router = express.Router()
-const printPostOptions = {
-  type: 'application/pdf'
-}
+const upload = multer()
+const uploadPrint = upload.fields([
+  {
+    name: 'pdf',
+    maxCount: 1
+  }
+])
 
-async function getJobs () {
+async function isPrinting () {
   const { stdout } = await exec('lpstat -o')
-  return stdout !== '' ? stdout.split('\n') : []
+  return stdout !== ''
 }
 
 router.get('/', asyncWrap(async (req, res) => {
-  const jobs = await getJobs()
   res.json({
     success: true,
-    pages: jobs.length
+    printing: await isPrinting()
   })
 }))
 
@@ -30,16 +34,16 @@ router.delete('/', asyncWrap(async (req, res) => {
   res.json({ success: true })
 }))
 
-router.post('/', express.raw(printPostOptions), asyncWrap(async (req, res) => {
-  const busy = await isBusy()
-  if (busy) {
+router.post('/', uploadPrint, asyncWrap(async (req, res) => {
+  const printing = await isPrinting()
+  if (printing) {
     return res.json({
       success: false,
       message: 'Server is busy printing...'
     })
   }
 
-  const buffer = req.body
+  const buffer = req.files.pdf[0]
   let pdfpath = ''
   while (pdfpath === '') {
     const random = Buffer.from(crypto.randomBytes(4)).toString('hex')

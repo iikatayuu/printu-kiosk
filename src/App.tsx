@@ -1,10 +1,19 @@
 
 import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+
+import Homepage from './pages/Homepage';
+import Print from './pages/Print';
 import './App.css';
 
 class App extends React.Component {
   render () {
-    return <h1></h1>;
+    return (
+      <Routes>
+        <Route index element={<Homepage />} />
+        <Route path="/print/:uploadId" element={<Print />} />
+      </Routes>
+    );
   }
 }
 

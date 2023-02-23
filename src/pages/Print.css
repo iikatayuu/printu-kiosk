@@ -1,0 +1,44 @@
+
+.print-container {
+  margin-top: 200px;
+}
+
+.print-title {
+  font-size: 18px;
+  text-align: center;
+}
+
+.printing {
+  margin-top: 18px;
+}
+
+.print-filename {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 20px;
+  font-style: italic;
+  font-weight: 700;
+}
+
+.print-page-preview {
+  width: 250px;
+  margin-top: 24px;
+  padding: 12.5px;
+  background-color: #ddd;
+  border: 2.5px solid #808080;
+  border-radius: 30px;
+  text-align: center;
+}
+
+.print-page-preview img {
+  width: 225px;
+}
+
+#print-gif {
+  width: 250px;
+}
+
+.print-link {
+  text-align: center;
+  margin-top: 12px;
+}
