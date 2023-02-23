@@ -18,7 +18,7 @@ const uploadPrint = upload.fields([
 ])
 
 async function isPrinting () {
-  const { stdout } = await exec('lpstat -o')
+  const { stdout } = await exec('lpstat -o', { windowsHide: true })
   return stdout !== ''
 }
 
@@ -30,7 +30,7 @@ router.get('/', asyncWrap(async (req, res) => {
 }))
 
 router.delete('/', asyncWrap(async (req, res) => {
-  await exec('cancel -a')
+  await exec('cancel -a', { windowsHide: true })
   res.json({ success: true })
 }))
 
@@ -56,7 +56,7 @@ router.post('/', uploadPrint, asyncWrap(async (req, res) => {
   }
 
   await fs.writeFile(pdfpath, buffer)
-  await exec(`lp "${pdfpath}"`)
+  await exec(`lp "${pdfpath}"`, { windowsHide: true })
   await fs.unlink(pdfpath)
 
   res.json({
