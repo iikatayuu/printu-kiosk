@@ -13,6 +13,21 @@
   margin-bottom: 36px;
 }
 
+.home-image-ptr {
+  align-self: flex-start;
+  position: relative;
+  margin: 24px 0;
+  width: 100vw;
+  height: 225px;
+  text-align: center;
+}
+
+.home-ptr {
+  position: absolute;
+  top: -10px;
+  left: 180px;
+}
+
 .home-text {
   padding-left: 24px;
   padding-right: 24px;
