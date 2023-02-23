@@ -43,7 +43,7 @@ router.post('/', uploadPrint, asyncWrap(async (req, res) => {
     })
   }
 
-  const buffer = req.files.pdf[0]
+  const buffer = req.files.pdf[0].buffer
   let pdfpath = ''
   while (pdfpath === '') {
     const random = Buffer.from(crypto.randomBytes(4)).toString('hex')
