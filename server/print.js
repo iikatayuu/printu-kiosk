@@ -47,7 +47,7 @@ router.post('/', uploadPrint, asyncWrap(async (req, res) => {
   let pdfpath = ''
   while (pdfpath === '') {
     const random = Buffer.from(crypto.randomBytes(4)).toString('hex')
-    const filepath = path.resolve(__dirname, `tmp/${random}.pdf`)
+    const filepath = path.resolve(__dirname, `../tmp/${random}.pdf`)
     try {
       await fs.access(filepath, fs.constants.F_OK)
     } catch (error) {
