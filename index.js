@@ -4,11 +4,13 @@ const path = require('node:path')
 const { exec } = require('node:child_process')
 const express = require('express')
 const dotenv = require('dotenv')
-const printAPI = require('./server/print')
 
 let configPath = path.resolve(__dirname, '.env.local')
 if (!fs.existsSync(configPath)) configPath = path.resolve(__dirname, '.env')
 dotenv.config({ path: configPath })
+
+const printAPI = require('./server/print')
+const status = require('./server/status')
 
 if (process.platform !== 'linux') {
   console.error('This program only supports Linux')
@@ -26,6 +28,7 @@ exec('lpstat -d', { windowsHide: true }, (error, stdout, stderr) => {
     process.exit(1)
   }
 
+  status.start()
   console.log(stdout)
 })
 
