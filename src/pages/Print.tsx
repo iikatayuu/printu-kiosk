@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link, Params, NavigateFunction, useParams, useNavigate } from 'react-router-dom';
+import { Params, NavigateFunction, useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 import { Document } from '../types';
@@ -117,6 +117,12 @@ class Print extends React.Component<PrintProps, PrintState> {
     }
   }
 
+  async redirect () {
+    const navigate = this.props.navigate;
+    await delay(2500);
+    navigate('/');
+  }
+
   async componentDidMount () {
     this.setState({ loading: true });
 
@@ -151,6 +157,8 @@ class Print extends React.Component<PrintProps, PrintState> {
     let pageStr = this.state.printing.toString();
     while (pageStr.length < 6) pageStr = `0${pageStr}`;
 
+    if (this.state.error !== '') this.redirect();
+
     return (
       <React.Fragment>
         {
@@ -181,7 +189,7 @@ class Print extends React.Component<PrintProps, PrintState> {
           this.state.error !== '' && (
             <div className="print-container">
               <h2 className="print-title">{ this.state.error }</h2>
-              <div className="print-link"><Link to="/">Back to Home</Link></div>
+              <p>Redirecting you to homepage</p>
             </div>
           )
         }
