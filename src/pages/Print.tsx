@@ -112,7 +112,8 @@ class Print extends React.Component<PrintProps, PrintState> {
 
     if (allSuccess) {
       const navigate = this.props.navigate;
-      navigate('/success');
+      const uploadId = this.props.params.uploadId;
+      navigate(`/success?filename=${document.filename}&upload=${uploadId}`);
     }
   }
 

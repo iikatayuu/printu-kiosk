@@ -18,3 +18,7 @@ body {
 .link {
   text-decoration: underline;
 }
+
+.text-center { text-align: center; }
+
+.mb-2 { margin-bottom: 16px; }

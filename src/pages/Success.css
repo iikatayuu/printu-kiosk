@@ -1,0 +1,39 @@
+
+.success-title {
+  margin-top: 32px;
+  font-size: 24px;
+}
+
+.success-feedback {
+  display: flex;
+  align-items: center;
+  margin-top: 24px;
+  padding: 0 32px;
+  font-size: 14px;
+}
+
+.success-feedback img {
+  margin-right: 16px;
+}
+
+.success-filename {
+  margin-top: 12px;
+  font-size: 24px;
+  font-style: italic;
+  font-weight: 700;
+}
+
+.success-preview {
+  position: relative;
+  margin-top: 24px;
+  padding: 12.5px;
+  background-color: #ddd;
+  border: 2.5px solid #808080;
+  border-radius: 30px;
+}
+
+.success-preview-gif {
+  position: absolute;
+  z-index: 100;
+  left: -100px;
+}
