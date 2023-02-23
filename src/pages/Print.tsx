@@ -4,6 +4,7 @@ import { Link, Params, NavigateFunction, useParams, useNavigate } from 'react-ro
 import axios from 'axios';
 
 import { Document } from '../types';
+import { delay } from '../utils';
 import { ReactComponent as LoadingIcon } from '../assets/loading.svg';
 import './Print.css';
 
@@ -65,10 +66,13 @@ class Print extends React.Component<PrintProps, PrintState> {
     const timeout = setTimeout(() => {
       error = true;
       printed = true;
-    }, 120000);
+    }, 90000);
 
     while (!printed) {
-      const checkRes = await axios.get(`${backend}/api/print`);
+      await delay(1000);
+      const date = new Date();
+      const timestamp = date.getTime();
+      const checkRes = await axios.get(`${backend}/api/print?t=${timestamp}`);
       const printing = checkRes.data.printing as boolean;
       if (!printing) {
         printed = true;
