@@ -9,8 +9,9 @@ You'll need the following in order to run this program:
 
  * [Printu Server](https://github.com/eidoriantan/printu)
  * [Nodejs](https://nodejs.org)
- * Pdfjam (`sudo apt install texlive-extra-utils`)
  * CUPS (`sudo apt install cups`)
+ * Pdfjam (`sudo apt install texlive-extra-utils`)
+ * Poppler-utils (`sudo apt install poppler-utils`)
 
 
 ### Running the Server
