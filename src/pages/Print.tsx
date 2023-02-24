@@ -66,7 +66,7 @@ class Print extends React.Component<PrintProps, PrintState> {
     let printed = false;
     let error = false;
 
-    this.setState({ preview });
+    this.setState({ printing: page, preview });
     const timeout = setTimeout(() => {
       error = true;
       printed = true;
@@ -108,8 +108,6 @@ class Print extends React.Component<PrintProps, PrintState> {
 
     for (let i = document.printed; i < totalPages; i++) {
       const page = i + 1;
-      this.setState({ printing: page });
-
       const success = await this.printPage(document, buffer, page);
       if (!success) {
         allSuccess = false;
