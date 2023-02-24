@@ -49,7 +49,6 @@ router.post('/', uploadPrint, asyncWrap(async (req, res) => {
   const npps = parseInt(req.body.npps)
   const color = req.body.color
   const copies = parseInt(req.body.copies)
-  const papersize = '{21.6cm,27.9cm}'
 
   let filename = ''
   let pdfpath = ''
@@ -65,24 +64,26 @@ router.post('/', uploadPrint, asyncWrap(async (req, res) => {
   }
 
   await fs.writeFile(pdfpath, buffer)
+  const nupPath = path.resolve(__dirname, `../tmp/${filename}-nup.pdf`)
+  const nupOptions = {
+    papersize: '{21.6cm,27.9cm}',
+    outfile: nupPath
+  }
+
   if (npps === 2) {
-    await pdfjam.nup(pdfpath, 2, 1, { papersize })
+    await pdfjam.nup(pdfpath, 2, 1, nupOptions)
   } else if (npps === 4) {
-    await pdfjam.nup(pdfpath, 2, 2, { papersize })
+    await pdfjam.nup(pdfpath, 2, 2, nupOptions)
   } else if (npps === 6) {
-    await pdfjam.nup(pdfpath, 3, 2, {
-      orientation: 'landscape',
-      papersize
-    })
+    nupOptions.orientation = 'landscape'
+    await pdfjam.nup(pdfpath, 3, 2, nupOptions)
   } else if (npps === 9) {
-    await pdfjam.nup(pdfpath, 3, 3, { papersize })
+    await pdfjam.nup(pdfpath, 3, 3, nupOptions)
   }
 
   if (npps > 1) {
-    const newpath = path.resolve(__dirname, `../tmp/${filename}-pdfjam.pdf`)
     await fs.unlink(pdfpath)
-
-    pdfpath = newpath
+    pdfpath = nupPath
   }
 
   const pdfroot = path.resolve(__dirname, `../tmp/${filename}`)
