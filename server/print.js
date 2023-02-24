@@ -51,6 +51,7 @@ router.post('/', uploadPrint, asyncWrap(async (req, res) => {
   const copies = parseInt(req.body.copies)
   const papersize = '{21.6cm,27.9cm}'
 
+  let filename = ''
   let pdfpath = ''
   while (pdfpath === '') {
     const random = Buffer.from(crypto.randomBytes(4)).toString('hex')
@@ -58,10 +59,12 @@ router.post('/', uploadPrint, asyncWrap(async (req, res) => {
     try {
       await fs.access(filepath, fs.constants.F_OK)
     } catch (error) {
+      filename = random
       pdfpath = filepath
     }
   }
 
+  await fs.writeFile(pdfpath, buffer)
   if (npps === 2) {
     await pdfjam.nup(pdfpath, 2, 1, { papersize })
   } else if (npps === 4) {
@@ -76,21 +79,26 @@ router.post('/', uploadPrint, asyncWrap(async (req, res) => {
   }
 
   if (npps > 1) {
-    const basename = path.basename(pdfpath)
-    const filename = basename.substring(0, basename.length - 4)
     const newpath = path.resolve(__dirname, `../tmp/${filename}-pdfjam.pdf`)
     await fs.unlink(pdfpath)
 
     pdfpath = newpath
   }
 
-  await fs.writeFile(pdfpath, buffer)
+  const pdfroot = path.resolve(__dirname, `../tmp/${filename}`)
+  await exec(`pdftoppm -jpeg -f ${page} -l ${page} "${pdfpath}" "${pdfroot}"`, { windowsHide: true })
+  const previewPath = `${pdfroot}-${page}.jpg`
+  const previewBuffer = await fs.readFile(previewPath, { encoding: 'base64' })
+  const previewUri = `data:image/jpeg;base64,${previewBuffer}`
+  await fs.unlink(previewPath)
+
   await exec(`lp -s -P ${page} -n ${copies} -o media=Letter "${pdfpath}"`, { windowsHide: true })
   await fs.unlink(pdfpath)
 
   res.json({
     success: true,
-    hash: crypto.createHash('md5').update(buffer).digest('hex')
+    hash: crypto.createHash('md5').update(buffer).digest('hex'),
+    preview: previewUri
   })
 }))
 

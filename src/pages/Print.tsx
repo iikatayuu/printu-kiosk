@@ -24,6 +24,7 @@ interface PrintState {
   document: Document | null;
   loading: boolean;
   printing: number;
+  preview: string;
   error: string;
 }
 
@@ -36,6 +37,7 @@ class Print extends React.Component<PrintProps, PrintState> {
       document: null,
       loading: true,
       printing: 0,
+      preview: '',
       error: ''
     };
 
@@ -59,10 +61,12 @@ class Print extends React.Component<PrintProps, PrintState> {
     formData.set('pdf', blob);
 
     const printRes = await axios.post(`${backend}/api/print`, formData);
+    const preview = printRes.data.preview
     const hash = printRes.data.hash;
     let printed = false;
     let error = false;
 
+    this.setState({ preview });
     const timeout = setTimeout(() => {
       error = true;
       printed = true;
@@ -154,8 +158,6 @@ class Print extends React.Component<PrintProps, PrintState> {
   }
 
   render () {
-    const server = process.env.REACT_APP_SERVER_API;
-    const uploadId = this.props.params.uploadId;
     const document = this.state.document;
     let pageStr = this.state.printing.toString();
     while (pageStr.length < 6) pageStr = `0${pageStr}`;
@@ -180,7 +182,7 @@ class Print extends React.Component<PrintProps, PrintState> {
               <h2 className="print-title">Printing:</h2>
               <div className="print-filename">{ document.filename }</div>
               <div className="print-page-preview">
-                <img src={`${server}/api/data/${uploadId}-${pageStr}.png`} alt={`Page ${pageStr}`} width={225} />
+                <img src={this.state.preview} alt={`Page ${pageStr}`} width={225} />
               </div>
 
               <img src="/images/printing.gif" alt="Printing" id="print-gif" width={250} />
