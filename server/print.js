@@ -64,6 +64,14 @@ router.post('/', uploadPrint, asyncWrap(async (req, res) => {
   }
 
   await fs.writeFile(pdfpath, buffer)
+
+  if (color === 'BW') {
+    const newpath = path.resolve(__dirname, `../tmp/${filename}-grayscaled.pdf`)
+    await exec(`gs -sDEVICE=pdfwrite -sProcessColorModel=DeviceGray -sColorConversionStrategy=Gray -dOverrideICC -o "${newpath}" -f "${pdfpath}"`)
+    await fs.unlink(pdfpath)
+    pdfpath = newpath
+  }
+
   const nupPath = path.resolve(__dirname, `../tmp/${filename}-nup.pdf`)
   const nupOptions = {
     papersize: '{21.6cm,27.9cm}',
