@@ -207,7 +207,7 @@ class Print extends React.Component<PrintProps, PrintState> {
           this.state.error !== '' && (
             <div className="print-container">
               <h2 className="print-title">{ this.state.error }</h2>
-              <p>Redirecting you to homepage</p>
+              <p className="print-redirect">Redirecting you to homepage</p>
             </div>
           )
         }
