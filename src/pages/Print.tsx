@@ -60,44 +60,49 @@ class Print extends React.Component<PrintProps, PrintState> {
     formData.set('copies', document.copies.toString());
     formData.set('pdf', blob);
 
-    const printRes = await axios.post(`${backend}/api/print`, formData);
-    const preview = printRes.data.preview
-    const hash = printRes.data.hash;
-    let printed = false;
-    let error = false;
+    try {
+      const printRes = await axios.post(`${backend}/api/print`, formData);
+      const preview = printRes.data.preview
+      const hash = printRes.data.hash;
+      let printed = false;
+      let timedOut = false;
 
-    this.setState({ printing: page, preview });
-    const timeout = setTimeout(() => {
-      error = true;
-      printed = true;
-    }, 90000);
-
-    while (!printed) {
-      await delay(1000);
-      const date = new Date();
-      const timestamp = date.getTime();
-      const checkRes = await axios.get(`${backend}/api/print?t=${timestamp}`);
-      const printing = checkRes.data.printing as boolean;
-      if (!printing) {
+      this.setState({ printing: page, preview });
+      const timeout = setTimeout(() => {
+        timedOut = true;
         printed = true;
-        clearTimeout(timeout);
-      }
-    }
+      }, 90000);
 
-    if (error) {
-      await axios.delete(`${backend}/api/print`);
+      while (!printed) {
+        await delay(1000);
+        const date = new Date();
+        const timestamp = date.getTime();
+        const checkRes = await axios.get(`${backend}/api/print?t=${timestamp}`);
+        const printing = checkRes.data.printing as boolean;
+        if (!printing) {
+          printed = true;
+          clearTimeout(timeout);
+        }
+      }
+
+      if (timedOut) {
+        await axios.delete(`${backend}/api/print`);
+        throw new Error('Printer timed out! Printer could be out of paper or ink. Please try again later');
+      }
+
+      const params = new URLSearchParams();
+      params.set('upload', uploadId);
+      params.set('page', page.toString());
+      params.set('hash', hash);
+      await axios.get(`${server}/printed.php?${params.toString()}`);
+    } catch (error: any) {
       this.setState({
         printing: 0,
-        error: 'Printer timed out! Printer could be out of paper or ink. Please try again later'
-      });
+        error: error.message
+      })
       return false;
     }
 
-    const params = new URLSearchParams();
-    params.set('upload', uploadId);
-    params.set('page', page.toString());
-    params.set('hash', hash);
-    await axios.get(`${server}/printed.php?${params.toString()}`);
     return true;
   }
 
@@ -138,12 +143,20 @@ class Print extends React.Component<PrintProps, PrintState> {
     }
 
     const server = process.env.REACT_APP_SERVER_API;
+    const docsRes = await axios.get(`${server}/api/document.php?upload=${uploadId}`)
+    const document = docsRes.data as Document;
+
+    if (!docsRes.data.success) {
+      this.setState({
+        loading: false,
+        error: docsRes.data.message
+      });
+      return;
+    }
+
     const response = await axios.get(`${server}/print.php?upload=${uploadId}`, {
       responseType: 'arraybuffer'
     });
-
-    const docsRes = await axios.get(`${server}/api/document.php?upload=${uploadId}`)
-    const document = docsRes.data as Document;
 
     const pdfBuffer = response.data;
     this.setState({
@@ -183,7 +196,9 @@ class Print extends React.Component<PrintProps, PrintState> {
                 <img src={this.state.preview} alt={`Page ${pageStr}`} width={225} />
               </div>
 
-              <img src="/images/printing.gif" alt="Printing" id="print-gif" width={250} />
+              <div className="print-page-icon">
+                <img src="/images/printing.gif" alt="Printing" id="print-gif" width={250} />
+              </div>
             </div>
           )
         }

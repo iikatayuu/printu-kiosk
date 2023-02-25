@@ -23,6 +23,8 @@
 .print-page-preview {
   width: 250px;
   margin-top: 24px;
+  margin-left: auto;
+  margin-right: auto;
   padding: 12.5px;
   background-color: #ddd;
   border: 2.5px solid #808080;
@@ -30,8 +32,8 @@
   text-align: center;
 }
 
-.print-page-preview img {
-  width: 225px;
+.print-page-icon {
+  text-align: center;
 }
 
 #print-gif {
