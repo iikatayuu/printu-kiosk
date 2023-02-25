@@ -42,13 +42,12 @@ const publicPath = path.resolve(__dirname, 'build')
 app.use('/', express.static(publicPath))
 app.use('/api/print', printAPI)
 
-app.use((err, req, res, next) => {
-  if (req.accepts('html')) {
-    const indexPath = path.resolve(publicPath, 'index.html')
-    res.sendFile(indexPath)
-    return
-  }
+app.use((req, res, next) => {
+  const indexPath = path.resolve(publicPath, 'index.html')
+  res.sendFile(indexPath)
+})
 
+app.use((err, req, res, next) => {
   res.json({
     success: false,
     message: err
