@@ -62,6 +62,8 @@ class Print extends React.Component<PrintProps, PrintState> {
 
     try {
       const printRes = await axios.post(`${backend}/api/print`, formData);
+      if (!printRes.data.success) throw new Error(printRes.data.message);
+
       const preview = printRes.data.preview
       const hash = printRes.data.hash;
       let printed = false;
