@@ -7,6 +7,7 @@ const exec = util.promisify(require('node:child_process').exec)
 const express = require('express')
 const multer = require('multer')
 const pdfjam = require('pdfjam')
+const sendMail = require('./utils/send-mail')
 const asyncWrap = require('./utils/async-wrap')
 
 const router = express.Router()
@@ -21,6 +22,47 @@ const uploadPrint = upload.fields([
 async function isPrinting () {
   const { stdout } = await exec('lpstat -o', { windowsHide: true })
   return stdout !== ''
+}
+
+const mailed = {}
+async function checkInks () {
+  const { stdout } = await exec('ink -p usb')
+  const lines = stdout.split('\n')
+  let hasInk = false
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    const matches = line.match(/^([a-zA-Z]+):\s+([0-9]+)%$/)
+    if (matches !== null) {
+      const ink = matches[1]
+      const percentage = parseInt(matches[2])
+
+      if (percentage > 10) hasInk = true
+      else {
+        if (typeof mailed[ink] === 'undefined') {
+          const options = {
+            host: process.env.SMTP_SERVER,
+            port: process.env.SMTP_PORT,
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS
+            }
+          }
+
+          mailed[ink] = true
+          sendMail(
+            process.env.NOTIFY_FROM,
+            process.env.ADMIN_EMAIL,
+            'PRINTU KIOSK NOTIFY',
+            `"${ink}" ink is below 10%!`,
+            options
+          )
+        }
+      }
+    }
+  }
+
+  return hasInk
 }
 
 router.get('/', asyncWrap(async (req, res) => {
@@ -41,6 +83,14 @@ router.post('/', uploadPrint, asyncWrap(async (req, res) => {
     return res.json({
       success: false,
       message: 'Server is busy printing...'
+    })
+  }
+
+  const hasInks = await checkInks()
+  if (!hasInks) {
+    return res.json({
+      success: false,
+      message: 'Printer has no inks. Please try again later'
     })
   }
 
