@@ -44,7 +44,7 @@ async function checkInks () {
   }
 
   const noInksStr = noInks.join(', ')
-  if (noInks.length > 0 && noInksStr !== mailed) {
+  if (!hasInk || (noInks.length > 0 && noInksStr !== mailed)) {
     const options = {
       host: process.env.SMTP_SERVER,
       port: process.env.SMTP_PORT,
@@ -59,7 +59,7 @@ async function checkInks () {
       process.env.NOTIFY_FROM,
       process.env.ADMIN_EMAIL,
       'PRINTU KIOSK NOTIFY',
-      `${noInksStr} ink(s) is below 10%!`,
+      noInks.length > 0 ? `${noInksStr} ink(s) is below 10%!` : 'Printer has no ink',
       options
     )
   }
