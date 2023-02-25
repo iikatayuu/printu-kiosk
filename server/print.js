@@ -24,10 +24,11 @@ async function isPrinting () {
   return stdout !== ''
 }
 
-const mailed = {}
+let mailed = ''
 async function checkInks () {
   const { stdout } = await exec('ink -p usb')
   const lines = stdout.split('\n')
+  const noInks = []
   let hasInk = false
 
   for (let i = 0; i < lines.length; i++) {
@@ -38,28 +39,29 @@ async function checkInks () {
       const percentage = parseInt(matches[2])
 
       if (percentage > 10) hasInk = true
-      else {
-        if (typeof mailed[ink] === 'undefined') {
-          const options = {
-            host: process.env.SMTP_SERVER,
-            port: process.env.SMTP_PORT,
-            auth: {
-              user: process.env.SMTP_USER,
-              pass: process.env.SMTP_PASS
-            }
-          }
+      else noInks.push(ink)
+    }
+  }
 
-          mailed[ink] = true
-          sendMail(
-            process.env.NOTIFY_FROM,
-            process.env.ADMIN_EMAIL,
-            'PRINTU KIOSK NOTIFY',
-            `"${ink}" ink is below 10%!`,
-            options
-          )
-        }
+  const noInksStr = noInks.join(', ')
+  if (noInks.length > 0 && noInksStr !== mailed) {
+    const options = {
+      host: process.env.SMTP_SERVER,
+      port: process.env.SMTP_PORT,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
       }
     }
+
+    mailed = noInksStr
+    sendMail(
+      process.env.NOTIFY_FROM,
+      process.env.ADMIN_EMAIL,
+      'PRINTU KIOSK NOTIFY',
+      `${noInksStr} ink(s) is below 10%!`,
+      options
+    )
   }
 
   return hasInk
