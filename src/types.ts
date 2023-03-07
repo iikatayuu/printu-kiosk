@@ -2,7 +2,6 @@
 export type Color = "RGB" | "BW";
 
 export interface Document {
-  idnumber: string;
   filename: string;
   copies: number;
   email: string;
