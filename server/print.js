@@ -89,12 +89,14 @@ router.post('/', uploadPrint, asyncWrap(async (req, res) => {
     })
   }
 
-  const hasInks = await checkInks()
-  if (!hasInks) {
-    return res.json({
-      success: false,
-      message: 'Printer has no inks. Please try again later'
-    })
+  if (process.env.CHECK_INKS) {
+    const hasInks = await checkInks()
+    if (!hasInks) {
+      return res.json({
+        success: false,
+        message: 'Printer has no inks. Please try again later'
+      })
+    }
   }
 
   const buffer = req.files.pdf[0].buffer
