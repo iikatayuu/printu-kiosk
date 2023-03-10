@@ -24,6 +24,7 @@ async function isPrinting () {
   return stdout !== ''
 }
 
+let papers = 50
 let mailed = ''
 async function checkInks () {
   const { stdout } = await exec('ink -p usb')
@@ -97,10 +98,35 @@ router.post('/', uploadPrint, asyncWrap(async (req, res) => {
   }
 
   const buffer = req.files.pdf[0].buffer
+  const totalPages = parseInt(req.body.total)
   const page = parseInt(req.body.page)
   const npps = parseInt(req.body.npps)
   const color = req.body.color
   const copies = parseInt(req.body.copies)
+
+  if (papers < totalPages) {
+    const options = {
+      host: process.env.SMTP_SERVER,
+      port: process.env.SMTP_PORT,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      }
+    }
+
+    sendMail(
+      process.env.NOTIFY_FROM,
+      process.env.ADMIN_EMAIL,
+      'PRINTU KIOSK NOTIFY',
+      'No papers',
+      options
+    )
+
+    return res.json({
+      success: false,
+      message: 'No papers. Admin was contacted'
+    })
+  }
 
   let filename = ''
   let pdfpath = ''
@@ -155,6 +181,7 @@ router.post('/', uploadPrint, asyncWrap(async (req, res) => {
 
   await exec(`lp -s -P ${page} -n ${copies} -o media=Letter "${pdfpath}"`, { windowsHide: true })
   await fs.unlink(pdfpath)
+  papers--
 
   res.json({
     success: true,
