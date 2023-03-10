@@ -157,7 +157,7 @@ router.post('/', uploadPrint, asyncWrap(async (req, res) => {
   }
 
   if (npps === 2) {
-    await pdfjam.nup(pdfpath, 2, 1, nupOptions)
+    await pdfjam.nup(pdfpath, 1, 2, nupOptions)
   } else if (npps === 4) {
     await pdfjam.nup(pdfpath, 2, 2, nupOptions)
   } else if (npps === 6) {
