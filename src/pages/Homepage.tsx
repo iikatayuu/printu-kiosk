@@ -48,6 +48,12 @@ class Homepage extends React.Component<HomepageProps, HomepageState> {
   }
 
   render () {
+    const qrStyle = {
+      width: '300px',
+      margin: '48px 0',
+      borderRadius: '18px'
+    };
+
     return (
       <React.Fragment>
         <img src="/images/logo.png" alt="PRINTU Logo" width={170} id="home-logo" />
@@ -77,7 +83,7 @@ class Homepage extends React.Component<HomepageProps, HomepageState> {
           )
         }
 
-        <QrReader delay={100} style={{ display: 'none' }} onError={this.handleError} onScan={this.handleScan} />
+        <QrReader delay={100} style={qrStyle} onError={this.handleError} onScan={this.handleScan} />
       </React.Fragment>
     );
   }
