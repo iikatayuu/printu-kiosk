@@ -116,7 +116,7 @@ class Print extends React.Component<PrintProps, PrintState> {
 
     for (let i = document.printed; i < totalPages; i++) {
       const page = i + 1;
-      const success = await this.printPage(document, buffer, page, totalPages);
+      const success = await this.printPage(document, buffer, page, totalPages - i);
       if (!success) {
         allSuccess = false;
         break;
