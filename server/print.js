@@ -183,7 +183,7 @@ router.post('/', uploadPrint, asyncWrap(async (req, res) => {
 
   await exec(`lp -s -P ${page} -n ${copies} -o media=Letter "${pdfpath}"`, { windowsHide: true })
   await fs.unlink(pdfpath)
-  papers--
+  papers -= copies
 
   res.json({
     success: true,
