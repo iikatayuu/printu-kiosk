@@ -24,7 +24,8 @@ async function isPrinting () {
   return stdout !== ''
 }
 
-let papers = 50
+const lowPaper = typeof process.env.LOW_PAPER !== 'undefined' ? parseInt(process.env.LOW_PAPER) : 10
+let papers = typeof process.env.INITIAL_PAPERS !== 'undefined' ? parseInt(process.env.INITIAL_PAPERS) : 50
 let mailed = ''
 async function checkInks () {
   const { stdout } = await exec('ink -p usb')
@@ -107,26 +108,9 @@ router.post('/', uploadPrint, asyncWrap(async (req, res) => {
   const copies = parseInt(req.body.copies)
 
   if (papers < totalPages) {
-    const options = {
-      host: process.env.SMTP_SERVER,
-      port: process.env.SMTP_PORT,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      }
-    }
-
-    sendMail(
-      process.env.NOTIFY_FROM,
-      process.env.ADMIN_EMAIL,
-      'PRINTU KIOSK NOTIFY',
-      'No papers',
-      options
-    )
-
     return res.json({
       success: false,
-      message: 'No papers. Admin was contacted'
+      message: 'Not enough papers'
     })
   }
 
@@ -184,6 +168,25 @@ router.post('/', uploadPrint, asyncWrap(async (req, res) => {
   await exec(`lp -s -P ${page} -n ${copies} -o media=Letter "${pdfpath}"`, { windowsHide: true })
   await fs.unlink(pdfpath)
   papers -= copies
+
+  if (papers <= lowPaper) {
+    const options = {
+      host: process.env.SMTP_SERVER,
+      port: process.env.SMTP_PORT,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      }
+    }
+
+    sendMail(
+      process.env.NOTIFY_FROM,
+      process.env.ADMIN_EMAIL,
+      'PRINTU KIOSK NOTIFY',
+      'No papers',
+      options
+    )
+  }
 
   res.json({
     success: true,
