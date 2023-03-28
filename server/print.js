@@ -101,13 +101,14 @@ router.post('/', uploadPrint, asyncWrap(async (req, res) => {
   }
 
   const buffer = req.files.pdf[0].buffer
-  const totalPages = parseInt(req.body.total)
+  const total = parseInt(req.body.total)
+  const totalPages = parseInt(req.body.total_pages)
   const page = parseInt(req.body.page)
   const npps = parseInt(req.body.npps)
   const color = req.body.color
   const copies = parseInt(req.body.copies)
 
-  if (papers < totalPages) {
+  if (papers < total) {
     return res.json({
       success: false,
       message: 'Not enough papers'
@@ -158,9 +159,19 @@ router.post('/', uploadPrint, asyncWrap(async (req, res) => {
     pdfpath = nupPath
   }
 
+  let totalPagesC = totalPages
+  let spaces = 0
+  while (totalPagesC > 0) {
+    totalPagesC = Math.floor(totalPagesC / 10)
+    spaces++
+  }
+
+  let pageStr = page.toString()
+  while (pageStr.length < spaces) pageStr = `0${pageStr}`
+
   const pdfroot = path.resolve(__dirname, `../tmp/${filename}`)
   await exec(`pdftoppm -jpeg -f ${page} -l ${page} "${pdfpath}" "${pdfroot}"`, { windowsHide: true })
-  const previewPath = `${pdfroot}-${page}.jpg`
+  const previewPath = `${pdfroot}-${pageStr}.jpg`
   const previewBuffer = await fs.readFile(previewPath, { encoding: 'base64' })
   const previewUri = `data:image/jpeg;base64,${previewBuffer}`
   await fs.unlink(previewPath)

@@ -45,7 +45,7 @@ class Print extends React.Component<PrintProps, PrintState> {
     this.startPrinting = this.startPrinting.bind(this);
   }
 
-  async printPage (document: Document, buffer: ArrayBuffer, page: number, totalPages: number) {
+  async printPage (document: Document, buffer: ArrayBuffer, page: number, total: number, totalPages: number) {
     const server = process.env.REACT_APP_SERVER_API;
     const backend = process.env.REACT_APP_BACKEND_API;
     const uploadId = this.props.params.uploadId;
@@ -55,7 +55,8 @@ class Print extends React.Component<PrintProps, PrintState> {
     const blob = new Blob([uint8]);
     const formData = new FormData();
     formData.set('page', page.toString());
-    formData.set('total', totalPages.toString());
+    formData.set('total', total.toString());
+    formData.set('total_pages', totalPages.toString())
     formData.set('npps', document.npps.toString());
     formData.set('color', document.color);
     formData.set('copies', document.copies.toString());
@@ -118,7 +119,7 @@ class Print extends React.Component<PrintProps, PrintState> {
     for (let i = document.printed; i < totalPages; i++) {
       const page = i + 1;
       const total = (totalPages - i) * copies;
-      const success = await this.printPage(document, buffer, page, total);
+      const success = await this.printPage(document, buffer, page, total, totalPages);
       if (!success) {
         allSuccess = false;
         break;
